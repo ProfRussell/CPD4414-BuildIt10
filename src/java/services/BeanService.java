@@ -21,6 +21,7 @@ import beans.MOTDBean;
 import java.io.Serializable;
 import javax.ejb.EJB;
 import javax.enterprise.context.SessionScoped;
+import javax.inject.Inject;
 import javax.json.Json;
 import javax.json.JsonObject;
 import javax.ws.rs.Consumes;
@@ -39,13 +40,13 @@ import javax.ws.rs.core.Response;
 @SessionScoped  // The Web Service must be Sessionable or everything else fails
 public class BeanService implements Serializable {
 
-    @EJB
+    @Inject
     LoginBean login;
 
-    @EJB
+    @Inject
     LoggingBean log;
 
-    @EJB
+    @Inject
     MOTDBean motd;
 
     @POST
