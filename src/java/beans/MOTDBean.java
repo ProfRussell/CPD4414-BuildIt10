@@ -15,7 +15,12 @@
  */
 package beans;
 
+import java.util.concurrent.TimeUnit;
+import javax.annotation.Resource;
 import javax.ejb.Singleton;
+import javax.enterprise.concurrent.ManagedScheduledExecutorService;
+import javax.validation.constraints.Size;
+import tasks.ChangeTask;
 
 /**
  *
@@ -24,6 +29,10 @@ import javax.ejb.Singleton;
 @Singleton
 public class MOTDBean {
 
+    @Resource
+    ManagedScheduledExecutorService executor;
+
+    @Size(min=3)
     private String motd = "Hello World!";
 
     public String getMotd() {
@@ -32,6 +41,18 @@ public class MOTDBean {
 
     public void setMotd(String motd) {
         this.motd = motd;
+        // Call an asynchronous task that performs another task on completion
+        executor.submit(new ChangeTask(motd));
+        // Call a scheduled task, that wipes out the value after 30 seconds
+        executor.schedule(new WipeTask(), 30, TimeUnit.SECONDS);
     }
 
+    private class WipeTask implements Runnable {
+
+        @Override
+        public void run() {
+            motd = "Hello World!";
+        }
+        
+    }
 }

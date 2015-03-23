@@ -19,11 +19,14 @@ import beans.LoggingBean;
 import beans.LoginBean;
 import beans.MOTDBean;
 import java.io.Serializable;
-import javax.ejb.EJB;
+import java.util.Set;
+import javax.annotation.Resource;
 import javax.enterprise.context.SessionScoped;
 import javax.inject.Inject;
 import javax.json.Json;
 import javax.json.JsonObject;
+import javax.validation.ConstraintViolation;
+import javax.validation.Validator;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -39,6 +42,9 @@ import javax.ws.rs.core.Response;
 @Path("/beans")
 @SessionScoped  // The Web Service must be Sessionable or everything else fails
 public class BeanService implements Serializable {
+
+    @Resource
+    Validator validator;
 
     @Inject
     LoginBean login;
@@ -64,8 +70,20 @@ public class BeanService implements Serializable {
     @Produces("application/json")
     public Response doPostMotd(JsonObject json) {
         log.log("MOTD: " + json.toString());
-        motd.setMotd(json.getString("motd"));
-        return Response.ok().build();
+        
+        // Attempt to validate the proposed change before committing it
+        Set<ConstraintViolation<MOTDBean>> violations
+                = validator.validateValue(MOTDBean.class, "motd", json.getString("motd"));
+                
+        if (violations.isEmpty()) {
+            motd.setMotd(json.getString("motd"));
+            return Response.ok().build();
+        } else {
+            for (ConstraintViolation<MOTDBean> v : violations) {
+                System.out.println(v.getMessage());
+            }
+            return Response.status(500).build();
+        }
     }
 
     @GET
