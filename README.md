@@ -1,4 +1,4 @@
-# CPD-4414 Build It Samples for Lesson #10
+# CPD-4414 Build It Samples for Lesson No.10
 ## Advanced Bean Dynamics
 
 This repo contains samples for a lesson based on various EJB topics.
